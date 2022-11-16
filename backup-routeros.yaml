@@ -55,7 +55,7 @@
       - name: Copy bin backup from RouterOS
         command: '{{item}}'
         with_items:
-          - sshpass -p ${ssh_pass} scp -P "{{ansible_port}}" ${ssh_user}@{{ ip_address }}:{{inventory_hostname}}.backup {{backup_bin_dir}}
+          - sshpass -p ${ssh_pass} scp -P "{{ansible_port}}" -o StrictHostKeyChecking=no ${ssh_user}@{{ ip_address }}:{{inventory_hostname}}.backup {{backup_bin_dir}}
           - mv {{backup_bin_dir}}{{inventory_hostname}}.backup {{backup_bin_dir}}{{inventory_hostname}}-{{time}}.backup 
         delegate_to: localhost
         # no_log: True
@@ -73,7 +73,7 @@
       - name: Copy dude-db backup from RouterOS
         command: '{{item}}'
         with_items:
-          - sshpass -p ${ssh_pass} scp -P "{{ansible_port}}" ${ssh_user}@{{ ip_address }}:{{inventory_hostname}}-dude-db.backup {{backup_dude_dir}}
+          - sshpass -p ${ssh_pass} scp -P "{{ansible_port}}" -o StrictHostKeyChecking=no ${ssh_user}@{{ ip_address }}:{{inventory_hostname}}-dude-db.backup {{backup_dude_dir}}
           - mv {{backup_dude_dir}}{{inventory_hostname}}-dude-db.backup {{backup_dude_dir}}{{inventory_hostname}}-dude-db-{{time}}.backup 
         delegate_to: localhost
         # no_log: True
