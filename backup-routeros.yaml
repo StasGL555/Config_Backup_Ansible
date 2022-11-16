@@ -1,0 +1,89 @@
+- name: RouterOS Devices
+  hosts: RouterOS
+  gather_facts: false
+  connection: network_cli
+  vars:
+    ansible_connection: ansible.netcommon.network_cli
+    ansible_network_os: community.routeros.routeros
+    ip_address: '{{hostvars[inventory_hostname].ansible_host}}'
+    backup_bin_dir: /home/devasc/ansible-proj/backup/routeros/bin/
+    backup_conf_dir: /home/devasc/ansible-proj/backup/routeros/config/
+    backup_dude_dir: /home/devasc/ansible-proj/backup/routeros/dude-db/
+    backup_git_dir: /home/devasc/ansible-proj/git-backup/routeros/
+  environment:
+    # for hide passwords in logs
+    ssh_pass: "{{ansible_password}}"
+    ssh_user: "{{ansible_user}}"
+    
+
+  tasks:
+    - block:
+      # - set_fact: time="{{lookup('pipe','date \"+%Y-%m-%d-%H-%M\"')}}"
+      - set_fact: time="{{lookup('pipe','date \"+%d.%m.%Y-%H.%M\"')}}"
+      
+      - name: Recive config from RouterOS
+        community.routeros.command:
+          commands:
+            - /export
+        register: export_config
+
+      - name: Recive config from RouterOS for GIT
+        community.routeros.command:
+          commands:
+            - /export hide-sensitive
+        register: export_config_git
+
+      - name: Save RouterOS config
+        copy:
+          content: "{{ export_config.stdout[0] }}"
+          dest: "{{backup_conf_dir}}{{ inventory_hostname }}-{{time}}.txt"
+
+      - name: Save RouterOS config for GIT
+        copy:
+          content: "{{ export_config_git.stdout[0] }}"
+          dest: "{{backup_git_dir}}{{ inventory_hostname }}.txt"
+
+      # - name: Print to screen
+      #   debug:
+      #     msg: "{{ export_config_git.stdout[0] }}"
+      
+      - name: Starting RouterOS System bin Backup
+        community.routeros.command:
+          commands: 
+            - /system backup save name {{inventory_hostname}}
+
+      - name: Copy bin backup from RouterOS
+        command: '{{item}}'
+        with_items:
+          - sshpass -p ${ssh_pass} scp -P "{{ansible_port}}" ${ssh_user}@{{ ip_address }}:{{inventory_hostname}}.backup {{backup_bin_dir}}
+          - mv {{backup_bin_dir}}{{inventory_hostname}}.backup {{backup_bin_dir}}{{inventory_hostname}}-{{time}}.backup 
+        delegate_to: localhost
+        # no_log: True
+
+      - name: Starting RouterOS dude-db backup
+        community.routeros.command:
+          commands: 
+            - /dude set enabled=no
+            - /delay 10s
+            - /dude export-db backup-file={{inventory_hostname}}-dude-db.backup
+            - /delay 10s
+            - /dude set enabled=yes
+        when: "'dude_db' in group_names"
+            
+      - name: Copy dude-db backup from RouterOS
+        command: '{{item}}'
+        with_items:
+          - sshpass -p ${ssh_pass} scp -P "{{ansible_port}}" ${ssh_user}@{{ ip_address }}:{{inventory_hostname}}-dude-db.backup {{backup_dude_dir}}
+          - mv {{backup_dude_dir}}{{inventory_hostname}}-dude-db.backup {{backup_dude_dir}}{{inventory_hostname}}-dude-db-{{time}}.backup 
+        delegate_to: localhost
+        # no_log: True
+        when: "'dude_db' in group_names"
+      rescue:
+         
+      - name: Send a message to Telegram on failed event
+        telegram:
+          token: "{{vault_tlg_token}}"
+          chat_id: "{{vault_tlg_chat}}"
+          msg: | 
+            from Ansible RouterOS playbook:
+            Failed on device {{inventory_hostname}}

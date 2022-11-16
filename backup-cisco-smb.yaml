@@ -1,0 +1,39 @@
+- name: Cisco SMB Devices
+  hosts: SMB
+  gather_facts: false
+  connection: network_cli
+  vars:
+    ansible_network_os: community.ciscosmb.ciscosmb
+    backup_conf_dir: /home/devasc/ansible-proj/backup/cisco/config/
+    backup_git_dir: /home/devasc/ansible-proj/git-backup/cisco/
+
+  tasks:
+    - block:
+      - set_fact: time="{{lookup('pipe','date \"+%d.%m.%Y-%H.%M\"')}}"
+      
+      - name: SMB show run
+        community.ciscosmb.command:
+          commands: show run
+        register: output_router
+        # become: yes
+        # become_method: enable
+
+
+      - name: Save SMB config
+        copy:
+          content: "{{ output_router.stdout[0] }}"
+          dest: "{{backup_conf_dir}}{{ inventory_hostname }}-{{time}}.txt"
+
+      - name: Save SMB config for GIT
+        copy:
+          content: "{{ output_router.stdout[0] }}"
+          dest: "{{backup_git_dir}}{{ inventory_hostname }}.txt"
+      rescue:
+      
+      - name: Send a message to Telegram on failed event
+        telegram:
+          token: "{{vault_tlg_token}}"
+          chat_id: "{{vault_tlg_chat}}"
+          msg: | 
+            from Ansible Cisco SMB playbook:
+            Failed on device {{inventory_hostname}}

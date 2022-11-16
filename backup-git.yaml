@@ -1,0 +1,26 @@
+- name: GIT section
+  hosts: localhost
+  vars:
+    git_dir: /home/devasc/ansible-proj/git-backup
+
+  tasks:
+    - block:
+      - set_fact: time="{{lookup('pipe','date \"+%d.%m.%Y-%H.%M\"')}}"
+
+      - name: GIT commands
+        shell: |
+          git add .
+          git commit -m "Device Backup on {{time}} "
+          git push
+        args:
+          chdir: "{{git_dir}}"
+        delegate_to: localhost
+        run_once: yes
+      rescue:
+      - name: Send a message to Telegram on failed event
+        telegram:
+          token: "{{vault_tlg_token}}"
+          chat_id: "{{vault_tlg_chat}}"
+          msg: | 
+            from Ansible GIT section playbook:
+            Failed on device {{inventory_hostname}}

@@ -1,0 +1,4 @@
+- import_playbook: backup-cisco.yaml
+- import_playbook: backup-cisco-smb.yaml
+- import_playbook: backup-routeros.yaml
+- import_playbook: backup-git.yaml
