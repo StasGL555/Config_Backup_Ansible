@@ -1,0 +1,12 @@
+[RouterOS]
+ROS-router ansible_host=192.168.0.1 ansible_port=22 ansible_user=admin ansible_password="{{vault_ros_pass}}"
+
+[ios]
+SMB-router ansible_host=192.168.0.2 ansible_port=22 ansible_user=admin ansible_password="{{vault_ios_pass}}" ansible_become_password="{{vault_en_ios_pass}}"
+
+[SMB]
+SMB-router ansible_host=192.168.0.3 ansible_user=admin ansible_password="{{vault_smb_pass}}"
+
+# RouterOS with Dude enabled
+[dude_db]
+ROS-router
