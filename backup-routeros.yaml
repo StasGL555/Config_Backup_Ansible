@@ -69,6 +69,8 @@
             - /delay 10s
             - /dude set enabled=yes
         when: "'dude_db' in group_names"
+        vars:
+          ansible_command_timeout: 60
             
       - name: Copy dude-db backup from RouterOS
         command: '{{item}}'

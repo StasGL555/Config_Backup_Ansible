@@ -48,70 +48,37 @@
         dest: /home/devasc/
         # local_follow: yes
 
-    - name: Copying backup dir
-      # become: true 
-      copy:
-        src: "{{backup_dir}}"
-        dest: /home/devasc/
-        # force: no
+    # - name: Copying backup dir
+    #   # become: true 
+    #   copy:
+    #     src: "{{backup_dir}}"
+    #     dest: /home/devasc/
+    #     # force: no
 
-    - name: GIT commands
-      shell: |
-        git config --global user.name stasgl555_prod
-        git config --global user.email stasgl555@mail.com
-      args:
-        chdir: "{{git_dir}}"
+    # - name: GIT commands
+    #   shell: |
+    #     git config --global user.name stasgl555_prod
+    #     git config --global user.email stasgl555@mail.com
+    #   args:
+    #     chdir: "{{git_dir}}"
     
-    - name: Ansible galaxy modules install
-      shell: |
-        ansible-galaxy collection install community.routeros
-        ansible-galaxy collection install community.ciscosmb
-
-
-          
-        
-
-
-# - name: create directory if they don't exist
-#   file:
-#     path: "{{ item }}"
-#     state: directory
-#     owner: root
-#     group: root
-#     mode: 0775
-#   loop:
-#     - backup_bin_dir
-#     backup_conf_dir
-#     - /data/another
-
-    # - name: copy ansible code
-    #   ansible.builtin.copy:
-    #     src: "{{work_dir}}"
-    #     dest: /home/
-    #     # owner: foo
-    #     # group: foo
-    #     # mode: '0644'
-
-    # - name: Create a directory if it does not exist
-    #   ansible.builtin.file:
-    #     path: //some_directory
-    #     state: directory
-    
-    # - name: copy ansible code
-    #   synchronize:
-    #     src: "{{work_dir}}"
-    #     dest: /home/
+    # - name: Ansible galaxy modules install
+    #   shell: |
+    #     ansible-galaxy collection install community.routeros
+    #     ansible-galaxy collection install community.ciscosmb
 
 
 
-    # - name: cron job create
-    #   Ansible.builtin.cron:
-    #     state: present
-    #     weekday: *
-    #     month: *
-    #     day: *
-    #     hour: *
-    #     minute: *
-    #     Job: /home/ansible-playbook main.yaml
+    - name: cron job create
+      ansible.builtin.cron:
+        name: ansible playbook config collector start
+        state: present
+        weekday: "6"
+        month: "*"
+        day: "*"
+        hour: "0"
+        # minute: "*/5"
+        minute: "0"
+        job:  cd /home/devasc/ansible_backup/ && ansible-playbook main.yaml
 
 
