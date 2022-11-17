@@ -48,11 +48,11 @@
         dest: /home/devasc/
         # local_follow: yes
 
-    - name: Copying backup dir
-      # become: true 
-      copy:
-        src: "{{backup_dir}}"
-        dest: /home/devasc/
+    # - name: Copying backup dir
+    #   # become: true 
+    #   copy:
+    #     src: "{{backup_dir}}"
+    #     dest: /home/devasc/
         # force: no
 
     # - name: GIT commands

@@ -36,8 +36,8 @@
       - name: Save RouterOS config
         command: '{{item}}'
         with_items:
-          - sshpass -p ${ssh_pass} scp -P "{{ansible_port}}" -o StrictHostKeyChecking=no ${ssh_user}@{{ ip_address }}:{{inventory_hostname}}.rsc {{backup_bin_dir}}
-          - mv {{backup_bin_dir}}{{inventory_hostname}}.rsc {{backup_bin_dir}}{{inventory_hostname}}-{{time}}.txt
+          - sshpass -p ${ssh_pass} scp -P "{{ansible_port}}" -o StrictHostKeyChecking=no ${ssh_user}@{{ ip_address }}:{{inventory_hostname}}.rsc {{backup_conf_dir}}
+          - mv {{backup_conf_dir}}{{inventory_hostname}}.rsc {{backup_conf_dir}}{{inventory_hostname}}-{{time}}.txt
         delegate_to: localhost
 
       - name: Save RouterOS config for GIT
