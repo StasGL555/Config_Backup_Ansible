@@ -48,12 +48,12 @@
         dest: /home/devasc/
         # local_follow: yes
 
-    # - name: Copying backup dir
-    #   # become: true 
-    #   copy:
-    #     src: "{{backup_dir}}"
-    #     dest: /home/devasc/
-    #     # force: no
+    - name: Copying backup dir
+      # become: true 
+      copy:
+        src: "{{backup_dir}}"
+        dest: /home/devasc/
+        # force: no
 
     # - name: GIT commands
     #   shell: |
@@ -73,7 +73,7 @@
       ansible.builtin.cron:
         name: ansible playbook config collector start
         state: present
-        weekday: "6"
+        weekday: "7"
         month: "*"
         day: "*"
         hour: "0"
